@@ -1,10 +1,25 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import models
 
 bp = Blueprint("log", __name__, url_prefix="/log")
 
 TIME_SLOTS = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
+
+
+def _date_slots(anchor=None, days=30):
+    today = anchor or date.today()
+    slots = []
+    for i in range(days):
+        d = today - timedelta(days=i)
+        if i == 0:
+            label = f"Today — {d.strftime('%b %-d')}"
+        elif i == 1:
+            label = f"Yesterday — {d.strftime('%b %-d')}"
+        else:
+            label = d.strftime('%A, %b %-d')
+        slots.append((str(d), label))
+    return slots
 
 
 def _calc_duration(start_time: str, end_time: str) -> int:
@@ -41,7 +56,7 @@ def entry(packer_id):
         except ValueError:
             entries = models.get_entries_for_packer(packer_id)
             return render_template("log_entry.html", packer=packer, entries=entries,
-                                   today=str(date.today()), time_slots=TIME_SLOTS,
+                                   time_slots=TIME_SLOTS, date_slots=_date_slots(),
                                    error="End time must be after start time.")
         entry_id = models.create_work_entry(
             packer_id=packer_id,
@@ -60,7 +75,7 @@ def entry(packer_id):
     today = date.today()
     entries = models.get_entries_for_packer(packer_id)
     return render_template("log_entry.html", packer=packer,
-                           entries=entries, today=str(today), time_slots=TIME_SLOTS)
+                           entries=entries, time_slots=TIME_SLOTS, date_slots=_date_slots())
 
 
 @bp.route("/<int:packer_id>/entries/<int:entry_id>/delete", methods=["POST"])
@@ -86,7 +101,7 @@ def edit_entry(packer_id, entry_id):
         except ValueError:
             return render_template("log_entry.html", packer=packer, edit_entry=entry_row,
                                    entries=models.get_entries_for_packer(packer_id),
-                                   today=str(date.today()), time_slots=TIME_SLOTS,
+                                   time_slots=TIME_SLOTS, date_slots=_date_slots(),
                                    error="End time must be after start time.")
         models.update_work_entry(
             entry_id=entry_id,
@@ -104,4 +119,4 @@ def edit_entry(packer_id, entry_id):
     return render_template("log_entry.html", packer=packer,
                            edit_entry=entry_row,
                            entries=models.get_entries_for_packer(packer_id),
-                           today=str(date.today()), time_slots=TIME_SLOTS)
+                           time_slots=TIME_SLOTS, date_slots=_date_slots())
