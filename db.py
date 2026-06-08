@@ -43,17 +43,32 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"],
-            detect_types=sqlite3.PARSE_DECLTYPES,
-        )
-        g.db.row_factory = sqlite3.Row
+        database_path = current_app.config["DATABASE"]
+        # For in-memory databases (used in testing), reuse a single shared
+        # connection stored on the app so nested app_context() calls see the
+        # same data rather than opening a fresh empty connection each time.
+        if database_path == ":memory:":
+            if not hasattr(current_app, "_test_db"):
+                conn = sqlite3.connect(
+                    database_path,
+                    detect_types=sqlite3.PARSE_DECLTYPES,
+                    check_same_thread=False,
+                )
+                conn.row_factory = sqlite3.Row
+                current_app._test_db = conn
+            g.db = current_app._test_db
+        else:
+            g.db = sqlite3.connect(
+                database_path,
+                detect_types=sqlite3.PARSE_DECLTYPES,
+            )
+            g.db.row_factory = sqlite3.Row
     return g.db
 
 
 def close_db(e=None):
     db = g.pop("db", None)
-    if db is not None:
+    if db is not None and db is not getattr(current_app, "_test_db", None):
         db.close()
 
 
