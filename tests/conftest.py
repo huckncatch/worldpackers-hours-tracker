@@ -12,9 +12,11 @@ def app():
         "TESTING": True,
         "DATABASE": ":memory:",
     })
-    with test_app.app_context():
-        database.init_db()
+    ctx = test_app.app_context()
+    ctx.push()
+    database.init_db()
     yield test_app
+    ctx.pop()
 
 
 @pytest.fixture()

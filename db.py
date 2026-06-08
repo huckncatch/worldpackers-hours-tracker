@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS packers (
 
 CREATE TABLE IF NOT EXISTS work_entries (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    packer_id           INTEGER NOT NULL REFERENCES packers(id),
+    packer_id           INTEGER NOT NULL,
     entry_date          TEXT    NOT NULL,
     start_time          TEXT    NOT NULL,
     end_time            TEXT    NOT NULL,
