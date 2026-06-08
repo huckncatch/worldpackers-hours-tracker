@@ -1,11 +1,105 @@
-<!doctype html><html><body>
-<h1>WorldPackers Dashboard</h1>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Hours Dashboard</h1>
+
+{% if not packer_data %}
+  <p class="text-gray-500">No active packers. <a href="{{ url_for('admin.new_packer') }}" class="text-green-700 underline">Add one</a>.</p>
+{% endif %}
+
 {% for item in packer_data %}
-<div>
-  <h2>{{ item.packer.name }}</h2>
-  <p>This week: {{ item.balance.this_week_hours }}h / {{ item.balance.adjusted_target_this_week }}h target</p>
-  <p>Balance: {{ item.balance.cumulative_balance }}h</p>
-  <a href="{{ url_for('log.entry', packer_id=item.packer.id) }}">Log hours</a>
+{% set b = item.balance %}
+{% set packer = item.packer %}
+<div class="bg-white rounded-2xl shadow p-5 mb-6">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-xl font-semibold">{{ packer.name }}</h2>
+    <span class="text-sm {% if b.cumulative_balance >= 0 %}text-green-600{% else %}text-red-500{% endif %} font-medium">
+      {% if b.cumulative_balance >= 0 %}+{% endif %}{{ b.cumulative_balance }}h overall
+    </span>
+  </div>
+
+  <div class="flex gap-6 items-center">
+    <div class="w-32 h-32 flex-shrink-0">
+      <canvas id="donut-{{ packer.id }}"></canvas>
+    </div>
+    <div class="flex-1 text-sm space-y-1">
+      <p><span class="font-medium">{{ b.this_week_hours }}h</span> worked this week</p>
+      <p>Target: <span class="font-medium">{{ b.adjusted_target_this_week }}h</span></p>
+      <p class="{% if b.this_week_remaining == 0 %}text-green-600 font-semibold{% else %}text-gray-600{% endif %}">
+        {% if b.this_week_remaining == 0 %}Week complete ✓
+        {% else %}{{ b.this_week_remaining }}h remaining
+        {% endif %}
+      </p>
+      <p class="text-gray-400">Week {{ b.current_week }}</p>
+      <a href="{{ url_for('log.entry', packer_id=packer.id) }}"
+         class="inline-block mt-2 bg-green-700 text-white text-xs px-3 py-1 rounded-full">
+        Log hours →
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-4 h-28">
+    <canvas id="bar-{{ packer.id }}"></canvas>
+  </div>
 </div>
+
+<script>
+(function() {
+  var packerId = {{ packer.id }};
+  fetch('/api/packer/' + packerId + '/stats')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var done = Math.min(d.this_week_hours, d.adjusted_target_this_week);
+      var remaining = Math.max(0, d.adjusted_target_this_week - d.this_week_hours);
+      new Chart(document.getElementById('donut-' + packerId), {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [done, remaining],
+            backgroundColor: ['#15803d', '#e5e7eb'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '70%',
+          plugins: { legend: { display: false } },
+          responsive: true,
+          maintainAspectRatio: true
+        }
+      });
+
+      var weekStart = new Date(d.week_start + 'T00:00:00');
+      var labels = [];
+      var values = [];
+      for (var i = 0; i < 7; i++) {
+        var day = new Date(weekStart);
+        day.setDate(weekStart.getDate() + i);
+        var key = day.getFullYear() + '-' + String(day.getMonth() + 1).padStart(2, '0') + '-' + String(day.getDate()).padStart(2, '0');
+        labels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day.getDay()]);
+        values.push(d.hours_by_day[key] || 0);
+      }
+      new Chart(document.getElementById('bar-' + packerId), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: '#16a34a',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+            x: { ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+    });
+})();
+</script>
 {% endfor %}
-</body></html>
+{% endblock %}

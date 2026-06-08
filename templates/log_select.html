@@ -1,3 +1,19 @@
-<!doctype html><html><body>
-{% for p in packers %}<a href="{{ url_for('log.entry', packer_id=p.id) }}">{{ p.name }}</a>{% endfor %}
-</body></html>
+{% extends "base.html" %}
+{% block title %}Who are you?{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Log Hours — Who are you?</h1>
+{% if packers %}
+  <ul class="space-y-3">
+  {% for p in packers %}
+    <li>
+      <a href="{{ url_for('log.entry', packer_id=p.id) }}"
+         class="block bg-white rounded-xl shadow px-5 py-4 text-lg font-medium hover:bg-green-50 transition">
+        {{ p.name }}
+      </a>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-gray-500">No active packers.</p>
+{% endif %}
+{% endblock %}

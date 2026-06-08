@@ -1,13 +1,33 @@
-<!doctype html>
-<html>
-<body>
-<form method="post">
-  <input name="name" value="{{ packer.name if packer else '' }}">
-  <input name="arrival_date" type="date" value="{{ packer.arrival_date if packer else '' }}">
-  <input name="departure_date" type="date" value="{{ packer.departure_date if packer else '' }}">
-  <input name="tracking_start_date" type="date" value="{{ packer.tracking_start_date if packer else '' }}">
-  <input name="tracking_end_date" type="date" value="{{ packer.tracking_end_date if packer else '' }}">
-  <button type="submit">Save</button>
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if packer else 'Add' }} Packer{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">{{ 'Edit' if packer else 'Add' }} Packer</h1>
+<div class="bg-white rounded-2xl shadow p-5">
+<form method="post" class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Name</label>
+    <input type="text" name="name" required value="{{ packer.name if packer else '' }}"
+           class="w-full border rounded-lg px-3 py-2">
+  </div>
+  {% for field, label in [
+      ('arrival_date','Arrival Date'),
+      ('departure_date','Departure Date'),
+      ('tracking_start_date','Tracking Start Date'),
+      ('tracking_end_date','Tracking End Date')
+  ] %}
+  <div>
+    <label class="block text-sm font-medium mb-1">{{ label }}</label>
+    <input type="date" name="{{ field }}" required
+           value="{{ packer[field] if packer else '' }}"
+           class="w-full border rounded-lg px-3 py-2">
+  </div>
+  {% endfor %}
+  <div class="flex gap-3 pt-2">
+    <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+      Save
+    </button>
+    <a href="{{ url_for('admin.index') }}" class="px-6 py-2 text-gray-600 hover:underline">Cancel</a>
+  </div>
 </form>
-</body>
-</html>
+</div>
+{% endblock %}

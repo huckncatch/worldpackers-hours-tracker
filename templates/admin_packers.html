@@ -1,7 +1,53 @@
-<!doctype html>
-<html>
-<body>
-{% for p in packers %}<p>{{ p.name }}</p>{% endfor %}
-<a href="{{ url_for('admin.new_packer') }}">Add packer</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Admin — Packers{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Packer Management</h1>
+  <a href="{{ url_for('admin.new_packer') }}"
+     class="bg-green-700 text-white text-sm px-4 py-2 rounded-lg">+ Add Packer</a>
+</div>
+
+<div class="bg-white rounded-2xl shadow overflow-hidden">
+<table class="w-full text-sm">
+  <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+    <tr>
+      <th class="px-4 py-3 text-left">Name</th>
+      <th class="px-4 py-3 text-left">Tracking Dates</th>
+      <th class="px-4 py-3 text-left">Status</th>
+      <th class="px-4 py-3 text-left">Actions</th>
+    </tr>
+  </thead>
+  <tbody class="divide-y">
+  {% for p in packers %}
+  <tr class="{% if p.hidden %}opacity-50{% endif %}">
+    <td class="px-4 py-3 font-medium">{{ p.name }}</td>
+    <td class="px-4 py-3 text-gray-500 text-xs">
+      {{ p.tracking_start_date }} → {{ p.tracking_end_date }}
+    </td>
+    <td class="px-4 py-3">
+      {% if p.locked %}<span class="text-orange-500 text-xs font-medium">Locked</span>{% endif %}
+      {% if p.hidden %}<span class="text-gray-400 text-xs font-medium ml-1">Hidden</span>{% endif %}
+      {% if not p.locked and not p.hidden %}<span class="text-green-600 text-xs">Active</span>{% endif %}
+    </td>
+    <td class="px-4 py-3">
+      <div class="flex gap-3">
+        <a href="{{ url_for('admin.edit_packer', packer_id=p.id) }}"
+           class="text-blue-600 text-xs hover:underline">Edit</a>
+        <form method="post" action="{{ url_for('admin.lock_packer', packer_id=p.id) }}" class="inline">
+          <button class="text-orange-500 text-xs hover:underline">
+            {{ 'Unlock' if p.locked else 'Lock' }}
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('admin.hide_packer', packer_id=p.id) }}" class="inline">
+          <button class="text-gray-500 text-xs hover:underline">
+            {{ 'Show' if p.hidden else 'Hide' }}
+          </button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
