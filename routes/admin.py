@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from datetime import date
 import models
 
-bp = Blueprint("admin", __name__, url_prefix="/admin")
+bp = Blueprint("admin", __name__, url_prefix="/ops")
 
 
 @bp.route("/")

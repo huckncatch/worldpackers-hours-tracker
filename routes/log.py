@@ -4,6 +4,8 @@ import models
 
 bp = Blueprint("log", __name__, url_prefix="/log")
 
+TIME_SLOTS = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
+
 
 def _calc_duration(start_time: str, end_time: str) -> int:
     """Return duration in minutes between HH:MM strings. Raises ValueError if not positive."""
@@ -39,7 +41,7 @@ def entry(packer_id):
         except ValueError:
             entries = models.get_entries_for_packer(packer_id)
             return render_template("log_entry.html", packer=packer, entries=entries,
-                                   today=str(date.today()),
+                                   today=str(date.today()), time_slots=TIME_SLOTS,
                                    error="End time must be after start time.")
         entry_id = models.create_work_entry(
             packer_id=packer_id,
@@ -58,7 +60,7 @@ def entry(packer_id):
     today = date.today()
     entries = models.get_entries_for_packer(packer_id)
     return render_template("log_entry.html", packer=packer,
-                           entries=entries, today=str(today))
+                           entries=entries, today=str(today), time_slots=TIME_SLOTS)
 
 
 @bp.route("/<int:packer_id>/entries/<int:entry_id>/delete", methods=["POST"])
@@ -84,7 +86,7 @@ def edit_entry(packer_id, entry_id):
         except ValueError:
             return render_template("log_entry.html", packer=packer, edit_entry=entry_row,
                                    entries=models.get_entries_for_packer(packer_id),
-                                   today=str(date.today()),
+                                   today=str(date.today()), time_slots=TIME_SLOTS,
                                    error="End time must be after start time.")
         models.update_work_entry(
             entry_id=entry_id,
@@ -102,4 +104,4 @@ def edit_entry(packer_id, entry_id):
     return render_template("log_entry.html", packer=packer,
                            edit_entry=entry_row,
                            entries=models.get_entries_for_packer(packer_id),
-                           today=str(date.today()))
+                           today=str(date.today()), time_slots=TIME_SLOTS)

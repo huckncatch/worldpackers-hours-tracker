@@ -22,15 +22,21 @@
     <div class="flex gap-3">
       <div class="flex-1">
         <label class="block text-sm text-gray-600 mb-1">Start</label>
-        <input type="time" name="start_time"
-               value="{{ edit_entry.start_time if edit_entry else '' }}" required
-               class="w-full border rounded-lg px-3 py-2 text-sm">
+        <select name="start_time" required class="w-full border rounded-lg px-3 py-2 text-sm">
+          <option value="">--:--</option>
+          {% for slot in time_slots %}
+          <option value="{{ slot }}" {% if edit_entry and edit_entry.start_time == slot %}selected{% endif %}>{{ slot }}</option>
+          {% endfor %}
+        </select>
       </div>
       <div class="flex-1">
         <label class="block text-sm text-gray-600 mb-1">End</label>
-        <input type="time" name="end_time"
-               value="{{ edit_entry.end_time if edit_entry else '' }}" required
-               class="w-full border rounded-lg px-3 py-2 text-sm">
+        <select name="end_time" required class="w-full border rounded-lg px-3 py-2 text-sm">
+          <option value="">--:--</option>
+          {% for slot in time_slots %}
+          <option value="{{ slot }}" {% if edit_entry and edit_entry.end_time == slot %}selected{% endif %}>{{ slot }}</option>
+          {% endfor %}
+        </select>
       </div>
     </div>
     <div>

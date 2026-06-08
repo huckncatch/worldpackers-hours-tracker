@@ -21,12 +21,12 @@ def test_dashboard_stub(client):
 
 
 def test_admin_list(client):
-    resp = client.get("/admin/")
+    resp = client.get("/ops/")
     assert resp.status_code == 200
 
 
 def test_admin_create_packer(client):
-    resp = client.post("/admin/packers/new", data={
+    resp = client.post("/ops/packers/new", data={
         "name": "Maria",
         "arrival_date": "2026-06-01",
         "departure_date": "2026-06-28",
@@ -39,7 +39,7 @@ def test_admin_create_packer(client):
 
 def test_admin_lock_packer(client, app):
     pid = _make_packer(app)
-    resp = client.post(f"/admin/packers/{pid}/lock", follow_redirects=True)
+    resp = client.post(f"/ops/packers/{pid}/lock", follow_redirects=True)
     assert resp.status_code == 200
     with app.app_context():
         packer = models.get_packer(pid)
@@ -48,7 +48,7 @@ def test_admin_lock_packer(client, app):
 
 def test_admin_hide_packer(client, app):
     pid = _make_packer(app)
-    resp = client.post(f"/admin/packers/{pid}/hide", follow_redirects=True)
+    resp = client.post(f"/ops/packers/{pid}/hide", follow_redirects=True)
     assert resp.status_code == 200
     with app.app_context():
         packer = models.get_packer(pid)

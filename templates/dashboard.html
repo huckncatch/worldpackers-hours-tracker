@@ -4,7 +4,7 @@
 <h1 class="text-2xl font-bold mb-6">Hours Dashboard</h1>
 
 {% if not packer_data %}
-  <p class="text-gray-500">No active packers. <a href="{{ url_for('admin.new_packer') }}" class="text-green-700 underline">Add one</a>.</p>
+  <p class="text-gray-500">No active packers yet.</p>
 {% endif %}
 
 {% for item in packer_data %}
