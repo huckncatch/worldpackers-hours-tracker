@@ -1,0 +1,3 @@
+<!doctype html><html><body>
+{% for p in packers %}<a href="{{ url_for('log.entry', packer_id=p.id) }}">{{ p.name }}</a>{% endfor %}
+</body></html>

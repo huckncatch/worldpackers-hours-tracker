@@ -1,0 +1,18 @@
+<!doctype html><html><body>
+<h1>{{ packer.name }}</h1>
+<form method="post">
+  <input name="entry_date" type="date" value="{{ today }}">
+  <input name="start_time" type="time">
+  <input name="end_time" type="time">
+  <input name="task_description">
+  <button type="submit">Log</button>
+</form>
+{% for e in entries %}
+<p>{{ e.entry_date }} {{ e.start_time }}–{{ e.end_time }} {{ e.duration_minutes }}min
+  <a href="{{ url_for('log.edit_entry', packer_id=packer.id, entry_id=e.id) }}">Edit</a>
+  <form method="post" action="{{ url_for('log.delete_entry', packer_id=packer.id, entry_id=e.id) }}" style="display:inline">
+    <button>Delete</button>
+  </form>
+</p>
+{% endfor %}
+</body></html>

@@ -1,0 +1,7 @@
+<!doctype html>
+<html>
+<body>
+{% for p in packers %}<p>{{ p.name }}</p>{% endfor %}
+<a href="{{ url_for('admin.new_packer') }}">Add packer</a>
+</body>
+</html>

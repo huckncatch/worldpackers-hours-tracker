@@ -1,0 +1,11 @@
+<!doctype html><html><body>
+<h1>WorldPackers Dashboard</h1>
+{% for item in packer_data %}
+<div>
+  <h2>{{ item.packer.name }}</h2>
+  <p>This week: {{ item.balance.this_week_hours }}h / {{ item.balance.adjusted_target_this_week }}h target</p>
+  <p>Balance: {{ item.balance.cumulative_balance }}h</p>
+  <a href="{{ url_for('log.entry', packer_id=item.packer.id) }}">Log hours</a>
+</div>
+{% endfor %}
+</body></html>
