@@ -11,6 +11,7 @@ def app():
     test_app = create_app({
         "TESTING": True,
         "DATABASE": ":memory:",
+        "OPS_PASSWORD": "testpass",
     })
     ctx = test_app.app_context()
     ctx.push()

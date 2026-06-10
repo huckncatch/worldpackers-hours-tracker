@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Flask
 import db as database
 
@@ -11,6 +12,11 @@ def create_app(config=None):
     )
     if config:
         app.config.from_mapping(config)
+
+    if "OPS_PASSWORD" not in app.config:
+        app.config["OPS_PASSWORD"] = os.environ.get("OPS_PASSWORD", "changeme")
+    if app.config["OPS_PASSWORD"] == "changeme":
+        logging.warning("OPS_PASSWORD is not set — using insecure default 'changeme'")
 
     os.makedirs(app.instance_path, exist_ok=True)
     database.init_app(app)
