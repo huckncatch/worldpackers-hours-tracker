@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Log Hours — {{ packer.name }}{% endblock %}
+{% macro time_select(name, options, selected) %}
+        <select name="{{ name }}" required class="flex-1 min-w-0 border rounded-lg px-2 py-2 text-sm">
+          <option value="">--</option>
+          {% for opt in options %}
+          <option value="{{ opt }}" {% if selected == opt %}selected{% endif %}>{{ opt }}</option>
+          {% endfor %}
+        </select>
+{% endmacro %}
 {% block content %}
 <div class="flex items-center justify-between mb-4">
   <h1 class="text-2xl font-bold">{{ packer.name }}</h1>
@@ -24,24 +32,20 @@
         {% endfor %}
       </select>
     </div>
-    <div class="flex gap-3">
-      <div class="flex-1 min-w-0">
-        <label class="block text-sm text-gray-600 mb-1">Start</label>
-        <select name="start_time" required class="w-full border rounded-lg px-3 py-2 text-sm">
-          <option value="">--:--</option>
-          {% for slot in time_slots %}
-          <option value="{{ slot }}" {% if edit_entry and edit_entry.start_time == slot %}selected{% endif %}>{{ slot }}</option>
-          {% endfor %}
-        </select>
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Start</label>
+      <div class="flex gap-2">
+        {{ time_select('start_hour', hour_options, start_parts[0] if start_parts else None) }}
+        {{ time_select('start_minute', minute_options, start_parts[1] if start_parts else None) }}
+        {{ time_select('start_ampm', ampm_options, start_parts[2] if start_parts else None) }}
       </div>
-      <div class="flex-1 min-w-0">
-        <label class="block text-sm text-gray-600 mb-1">End</label>
-        <select name="end_time" required class="w-full border rounded-lg px-3 py-2 text-sm">
-          <option value="">--:--</option>
-          {% for slot in time_slots %}
-          <option value="{{ slot }}" {% if edit_entry and edit_entry.end_time == slot %}selected{% endif %}>{{ slot }}</option>
-          {% endfor %}
-        </select>
+    </div>
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">End</label>
+      <div class="flex gap-2">
+        {{ time_select('end_hour', hour_options, end_parts[0] if end_parts else None) }}
+        {{ time_select('end_minute', minute_options, end_parts[1] if end_parts else None) }}
+        {{ time_select('end_ampm', ampm_options, end_parts[2] if end_parts else None) }}
       </div>
     </div>
     <div>

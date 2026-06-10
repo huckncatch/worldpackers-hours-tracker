@@ -4,7 +4,42 @@ import models
 
 bp = Blueprint("log", __name__, url_prefix="/log")
 
-TIME_SLOTS = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
+HOUR_OPTIONS = [str(h) for h in range(1, 13)]
+MINUTE_OPTIONS = ["00", "15", "30", "45"]
+AMPM_OPTIONS = ["AM", "PM"]
+
+
+def _to_24h(hour12: str, minute: str, ampm: str) -> str:
+    """Combine 12h picker components into a 24h 'HH:MM' string."""
+    h = int(hour12) % 12
+    if ampm == "PM":
+        h += 12
+    return f"{h:02d}:{minute}"
+
+
+def _from_24h(time_str: str) -> tuple[str, str, str]:
+    """Split a 24h 'HH:MM' string into (hour12, minute, ampm)."""
+    h, m = time_str.split(":")
+    h = int(h)
+    ampm = "AM" if h < 12 else "PM"
+    h12 = h % 12 or 12
+    return str(h12), m, ampm
+
+
+def _time_from_form(prefix: str) -> str:
+    return _to_24h(
+        request.form[f"{prefix}_hour"],
+        request.form[f"{prefix}_minute"],
+        request.form[f"{prefix}_ampm"],
+    )
+
+
+def _picker_options():
+    return {
+        "hour_options": HOUR_OPTIONS,
+        "minute_options": MINUTE_OPTIONS,
+        "ampm_options": AMPM_OPTIONS,
+    }
 
 
 def _date_slots(anchor=None, days=30):
@@ -49,14 +84,14 @@ def select():
 def entry(packer_id):
     packer = models.get_packer(packer_id)
     if request.method == "POST":
-        start = request.form["start_time"]
-        end = request.form["end_time"]
+        start = _time_from_form("start")
+        end = _time_from_form("end")
         try:
             duration = _calc_duration(start, end)
         except ValueError:
             entries = models.get_entries_for_packer(packer_id)
             return render_template("log_entry.html", packer=packer, entries=entries,
-                                   time_slots=TIME_SLOTS, date_slots=_date_slots(),
+                                   date_slots=_date_slots(), **_picker_options(),
                                    error="End time must be after start time.")
         entry_id = models.create_work_entry(
             packer_id=packer_id,
@@ -75,7 +110,7 @@ def entry(packer_id):
     today = date.today()
     entries = models.get_entries_for_packer(packer_id)
     return render_template("log_entry.html", packer=packer,
-                           entries=entries, time_slots=TIME_SLOTS, date_slots=_date_slots())
+                           entries=entries, date_slots=_date_slots(), **_picker_options())
 
 
 @bp.route("/<int:packer_id>/entries/<int:entry_id>/delete", methods=["POST"])
@@ -94,14 +129,16 @@ def edit_entry(packer_id, entry_id):
     packer = models.get_packer(packer_id)
     entry_row = models.get_work_entry(entry_id)
     if request.method == "POST":
-        start = request.form["start_time"]
-        end = request.form["end_time"]
+        start = _time_from_form("start")
+        end = _time_from_form("end")
         try:
             duration = _calc_duration(start, end)
         except ValueError:
             return render_template("log_entry.html", packer=packer, edit_entry=entry_row,
                                    entries=models.get_entries_for_packer(packer_id),
-                                   time_slots=TIME_SLOTS, date_slots=_date_slots(),
+                                   date_slots=_date_slots(), **_picker_options(),
+                                   start_parts=_from_24h(entry_row["start_time"]),
+                                   end_parts=_from_24h(entry_row["end_time"]),
                                    error="End time must be after start time.")
         models.update_work_entry(
             entry_id=entry_id,
@@ -119,4 +156,6 @@ def edit_entry(packer_id, entry_id):
     return render_template("log_entry.html", packer=packer,
                            edit_entry=entry_row,
                            entries=models.get_entries_for_packer(packer_id),
-                           time_slots=TIME_SLOTS, date_slots=_date_slots())
+                           date_slots=_date_slots(), **_picker_options(),
+                           start_parts=_from_24h(entry_row["start_time"]),
+                           end_parts=_from_24h(entry_row["end_time"]))
