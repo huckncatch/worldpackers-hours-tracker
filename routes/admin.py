@@ -1,8 +1,37 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+import hmac
+import logging
+from urllib.parse import urlparse
+from flask import Blueprint, render_template, redirect, url_for, request, session, current_app
 from datetime import date
 import models
 
 bp = Blueprint("admin", __name__, url_prefix="/ops")
+
+
+@bp.before_request
+def require_auth():
+    if request.endpoint == "admin.login":
+        return
+    if not session.get("ops_authed"):
+        return redirect(url_for("admin.login", next=request.path))
+
+
+@bp.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        submitted = request.form.get("password", "")
+        expected = current_app.config["OPS_PASSWORD"]
+        if hmac.compare_digest(submitted, expected):
+            session["ops_authed"] = True
+            next_url = request.form.get("next") or request.args.get("next") or "/ops"
+            parsed = urlparse(next_url)
+            if parsed.scheme or parsed.netloc or not next_url.startswith("/ops"):
+                next_url = "/ops"
+            return redirect(next_url)
+        error = "Wrong password"
+    next_val = request.args.get("next", "")
+    return render_template("admin_login.html", error=error, next=next_val)
 
 
 @bp.route("/")

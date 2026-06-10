@@ -20,13 +20,13 @@ def test_dashboard_stub(client):
     assert resp.status_code == 200
 
 
-def test_admin_list(client):
-    resp = client.get("/ops/")
+def test_admin_list(authed_client):
+    resp = authed_client.get("/ops/")
     assert resp.status_code == 200
 
 
-def test_admin_create_packer(client):
-    resp = client.post("/ops/packers/new", data={
+def test_admin_create_packer(authed_client):
+    resp = authed_client.post("/ops/packers/new", data={
         "name": "Maria",
         "arrival_date": "2026-06-01",
         "departure_date": "2026-06-28",
@@ -37,18 +37,18 @@ def test_admin_create_packer(client):
     assert b"Maria" in resp.data
 
 
-def test_admin_lock_packer(client, app):
+def test_admin_lock_packer(authed_client, app):
     pid = _make_packer(app)
-    resp = client.post(f"/ops/packers/{pid}/lock", follow_redirects=True)
+    resp = authed_client.post(f"/ops/packers/{pid}/lock", follow_redirects=True)
     assert resp.status_code == 200
     with app.app_context():
         packer = models.get_packer(pid)
         assert packer["locked"] == 1
 
 
-def test_admin_hide_packer(client, app):
+def test_admin_hide_packer(authed_client, app):
     pid = _make_packer(app)
-    resp = client.post(f"/ops/packers/{pid}/hide", follow_redirects=True)
+    resp = authed_client.post(f"/ops/packers/{pid}/hide", follow_redirects=True)
     assert resp.status_code == 200
     with app.app_context():
         packer = models.get_packer(pid)

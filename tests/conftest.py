@@ -23,3 +23,9 @@ def app():
 @pytest.fixture()
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture()
+def authed_client(client):
+    client.post("/ops/login", data={"password": "testpass"})
+    return client
