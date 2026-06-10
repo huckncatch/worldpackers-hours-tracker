@@ -49,7 +49,7 @@ The app listens on `0.0.0.0:5050`. Open `http://<your-machine-ip>:5050` from any
 
 The app runs in a detached tmux session so it survives login and can be inspected in a terminal.
 
-A self-contained `bin/start.sh` and `bin/install.sh` (to set up the LaunchAgent automatically after cloning) are on the roadmap. For now, create a start script and LaunchAgent plist manually — the pattern used here mirrors the tmux session approach in the [things-mcp](https://github.com/nicholasgasior/things-mcp) project.
+After cloning, run `bin/install.sh` — it provisions `.env` (prompting for the admin/ops password on first run), creates the venv and installs dependencies, installs and loads the LaunchAgent, and starts the server.
 
 To view the server log once running:
 

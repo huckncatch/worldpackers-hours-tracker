@@ -10,8 +10,6 @@
 
 - [ ] **Excused days (blocked-out dates)** — Allow the host to mark specific dates as exempt from hours calculations (e.g. camping trips, travel days, host days off). Excused days should pro-rate the weekly target: a week with N excused days has a target of `25 × (7 − N) / 7` hours instead of the full 25. Needs: a new `excused_days` table (packer_id or NULL for all packers, date, reason); admin UI to add/remove excused days; balance logic updated to subtract excused days from each week's target. Consider whether excused days apply globally (all packers) or per-packer.
 
-- [ ] **Self-contained deploy setup** — Move `start-worldpackers.sh` from `~/config/bin/` into this repo (e.g. `bin/start.sh`). Add a `bin/install.sh` script that: creates the venv + installs deps, copies/symlinks the LaunchAgent plist to `~/Library/LaunchAgents/`, loads it with `launchctl`, and runs the start script. After a fresh `git clone` on a new machine, `bin/install.sh` should be all that's needed to have the server auto-starting. Update the plist to reference the in-repo script path.
-
 ## Completed
 
 - [x] Project scaffold, DB schema, routes, balance logic, full UI (2026-06-07)
@@ -20,3 +18,4 @@
 - [x] 15-minute time selects, fix form field overflow (2026-06-08)
 - [x] Admin password gate (2026-06-09)
 - [x] Multi-column time picker (hour/minute/AM-PM selects) (2026-06-09)
+- [x] Self-contained deploy setup — `bin/install.sh` provisions `.env`, venv/deps, LaunchAgent, and starts the server (2026-06-09)
