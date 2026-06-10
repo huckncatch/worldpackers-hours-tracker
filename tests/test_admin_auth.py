@@ -53,3 +53,13 @@ def test_next_param_sanitized_rejects_non_ops_path(client):
                        follow_redirects=False)
     assert resp.headers["Location"].endswith("/ops") or \
            resp.headers["Location"].endswith("/ops/")
+
+
+def test_login_page_has_password_input(client):
+    resp = client.get("/ops/login")
+    assert b'type="password"' in resp.data
+    assert b'name="password"' in resp.data
+
+def test_login_page_no_error_by_default(client):
+    resp = client.get("/ops/login")
+    assert b"Wrong password" not in resp.data
