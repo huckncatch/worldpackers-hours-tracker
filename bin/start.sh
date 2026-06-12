@@ -1,7 +1,13 @@
 #!/bin/sh
 # Start WorldPackers Hours Tracker in a dedicated tmux session.
 # Idempotent — does nothing if session already exists.
-TMUX=/opt/homebrew/bin/tmux
+if [ -x /opt/homebrew/bin/tmux ]; then
+  TMUX=/opt/homebrew/bin/tmux
+elif [ -x /usr/local/bin/tmux ]; then
+  TMUX=/usr/local/bin/tmux
+else
+  TMUX=tmux
+fi
 PYTHON=/Users/soob/Developer/worldpackers-hours-tracker/.venv/bin/python3
 APP_DIR=/Users/soob/Developer/worldpackers-hours-tracker
 LOG=/Users/soob/Library/Logs/worldpackers-tracker.log
