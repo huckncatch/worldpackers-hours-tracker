@@ -19,6 +19,41 @@ corresponding TODO item done.
     excused day), week 2 in progress (7h logged so far).
   - **Kai** — arrives today, week 1, no entries yet.
 
+## 2026-06-12 — Excused days reduce target by 5h, with dashboard indicator
+
+Excused days now reduce a week's 25h target by 5h each (floored at 0),
+reflecting a 5-day/5h-per-day work model — previously each excused day reduced
+the target by 25/7h (≈3.57h), based on a 7-day model. The dashboard's weekly
+bar chart also now marks excused days in the current week: the day's
+axis label gets "✕" appended and is rendered in red, and if hours are logged
+for that day the bar itself is also red.
+
+**Golden path**
+
+1. Reset dev data: `bin/dev.sh --reset` (re-seeds Maria and Kai).
+2. Open the dashboard (`/`). Maria is in week 2 with week 1 complete (22h
+   logged, 1 excused day). Confirm her balance now shows **+2.0h overall**
+   (target was 25 − 5 = 20h, so 22 − 20 = +2; previously this was +0.57h).
+3. Log in at `/ops/login` (password `devpass`), go to "Excused Days", and add
+   an excused day for **Kai** on today's date.
+4. Back on the dashboard, confirm Kai's weekly bar chart shows today's axis
+   label in **red** with "✕" appended (e.g. "Fri ✕") — even though the bar
+   itself has no height yet (no hours logged) — and his target reads
+   **20.0h** (25 − 5, since today is in his current week).
+5. Go to `/log/2` (Kai) and log a couple hours for today (the excused day).
+   Confirm the bar for that day now renders in **red** with height
+   reflecting the logged hours, and the label stays red.
+
+**Edge cases**
+
+- Add excused days for 5+ days within the same rolling week — confirm the
+  week's target floors at 0 (not negative) via `/api/packer/<id>/stats`.
+- An excused day in a *completed* week (like Maria's) should not add a "✕" to
+  the current week's chart — only days within `week_start`–`week_end` for the
+  *current* week are marked.
+- Delete the test excused day and any test entries afterward to keep dev data
+  clean.
+
 ## 2026-06-12 — Single 15-minute time picker
 
 Replaced the hour/minute/AM-PM three-select time picker with a single select

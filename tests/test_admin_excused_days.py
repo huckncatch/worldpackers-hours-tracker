@@ -62,5 +62,6 @@ def test_excused_day_reduces_target_via_stats_api(client, app):
     resp = client.get(f"/api/packer/{pid}/stats?today=2026-06-08")
     assert resp.status_code == 200
     data = resp.json
-    # Without the excused day, cumulative_balance would be -25.0
-    assert data["cumulative_balance"] == -21.43
+    # Without the excused day, cumulative_balance would be -25.0; with one
+    # excused day, week 1's target drops by 5h to 20.0
+    assert data["cumulative_balance"] == -20.0

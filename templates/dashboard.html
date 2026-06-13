@@ -71,12 +71,18 @@
       var weekStart = new Date(d.week_start + 'T00:00:00');
       var labels = [];
       var values = [];
+      var colors = [];
+      var excusedFlags = [];
+      var excused = d.excused_days_this_week || [];
       for (var i = 0; i < 7; i++) {
         var day = new Date(weekStart);
         day.setDate(weekStart.getDate() + i);
         var key = day.getFullYear() + '-' + String(day.getMonth() + 1).padStart(2, '0') + '-' + String(day.getDate()).padStart(2, '0');
-        labels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day.getDay()]);
+        var isExcused = excused.indexOf(key) !== -1;
+        labels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day.getDay()] + (isExcused ? ' ✕' : ''));
         values.push(d.hours_by_day[key] || 0);
+        colors.push(isExcused ? '#fca5a5' : '#16a34a');
+        excusedFlags.push(isExcused);
       }
       new Chart(document.getElementById('bar-' + packerId), {
         type: 'bar',
@@ -84,7 +90,7 @@
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: '#16a34a',
+            backgroundColor: colors,
             borderRadius: 4
           }]
         },
@@ -94,7 +100,14 @@
           plugins: { legend: { display: false } },
           scales: {
             y: { beginAtZero: true, ticks: { font: { size: 10 } } },
-            x: { ticks: { font: { size: 10 } } }
+            x: {
+              ticks: {
+                font: { size: 10 },
+                color: function(context) {
+                  return excusedFlags[context.index] ? '#dc2626' : '#666';
+                }
+              }
+            }
           }
         }
       });

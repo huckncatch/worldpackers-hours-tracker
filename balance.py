@@ -26,10 +26,10 @@ def parse_excused_days(raw_excused_days) -> set:
 
 
 def _week_target_hours(tracking_start: date, week_number: int, excused_dates: set) -> float:
-    """25h target for the week, pro-rated down for each excused day that falls in it."""
+    """25h target for the week, reduced by 5h for each excused day that falls in it (floored at 0)."""
     week_start, week_end = get_week_boundaries(tracking_start, week_number)
     excused_count = sum(1 for d in excused_dates if week_start <= d <= week_end)
-    return 25 * max(0, 7 - excused_count) / 7
+    return max(0.0, 25 - 5 * excused_count)
 
 
 def parse_entries_for_balance(raw_entries) -> list:
@@ -54,12 +54,13 @@ def compute_balance(entries: list, tracking_start: date, today: date,
     entries: list of dicts with 'entry_date' (date) and 'duration_minutes' (int).
              Use parse_entries_for_balance() to convert from SQLite rows.
     excused_dates: set of date objects exempt from the weekly target. Each excused
-             day in a week reduces that week's 25h target by 25/7h.
+             day in a week reduces that week's 25h target by 5h (floored at 0).
              Use parse_excused_days() to convert from SQLite rows.
 
     Returns dict with: current_week, completed_weeks, total_hours_worked,
     cumulative_balance, adjusted_target_this_week, this_week_hours,
-    this_week_remaining, hours_by_day, week_start, week_end.
+    this_week_remaining, hours_by_day, week_start, week_end,
+    excused_days_this_week.
     """
     excused_dates = excused_dates or set()
     current_week = get_week_number(tracking_start, today)
@@ -89,6 +90,10 @@ def compute_balance(entries: list, tracking_start: date, today: date,
     adjusted_target = max(0.0, current_week_target - cumulative_balance)
     this_week_remaining = max(0.0, adjusted_target - this_week_hours)
 
+    excused_days_this_week = sorted(
+        str(d) for d in excused_dates if week_start <= d <= week_end
+    )
+
     return {
         "current_week": current_week,
         "completed_weeks": completed_weeks,
@@ -100,4 +105,5 @@ def compute_balance(entries: list, tracking_start: date, today: date,
         "hours_by_day": {k: round(v, 2) for k, v in hours_by_day.items()},
         "week_start": str(week_start),
         "week_end": str(week_end),
+        "excused_days_this_week": excused_days_this_week,
     }

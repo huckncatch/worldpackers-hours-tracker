@@ -20,3 +20,4 @@
 - [x] Cross-architecture tmux support — `bin/start.sh` detects Homebrew's tmux path on both Apple Silicon and Intel Macs (2026-06-11)
 - [x] Excused days (blocked-out dates) — new `excused_days` table (global or per-packer), admin UI to add/remove, balance logic pro-rates each week's 25h target by `25 × (7 − N) / 7` (2026-06-11)
 - [x] Single 15-minute time picker — replaced hour/minute/AM-PM three-select with one select of "HH:MM" 24h values labeled in 12h format (2026-06-12)
+- [x] Excused day target = 5h, dashboard indicator — excused days now reduce a week's 25h target by 5h each (floored at 0), reflecting a 5-day/5h-per-day work model instead of the prior 25/7h-per-day model. The dashboard's weekly bar chart marks excused days in the current week with a red "✕" axis label (and a red bar once hours are logged) (2026-06-12)

@@ -101,9 +101,9 @@ class TestExcusedDays:
         today = date(2026, 6, 8)  # Week 2, day 1
         excused = {date(2026, 6, 3)}  # one excused day in week 1
         result = compute_balance([], start, today, excused)
-        # Week 1 target drops from 25 to 25*6/7 = 21.43
-        assert result["cumulative_balance"] == -21.43
-        assert result["adjusted_target_this_week"] == 46.43
+        # Week 1 target drops from 25 to 25 - 5 = 20
+        assert result["cumulative_balance"] == -20.0
+        assert result["adjusted_target_this_week"] == 45.0
 
     def test_excused_day_in_current_week_reduces_target(self):
         start = date(2026, 6, 1)
@@ -112,24 +112,33 @@ class TestExcusedDays:
         result = compute_balance([], start, today, excused)
         assert result["completed_weeks"] == 0
         assert result["cumulative_balance"] == 0.0
-        # Week 1 target drops from 25 to 25*6/7 = 21.43
-        assert result["adjusted_target_this_week"] == 21.43
+        # Week 1 target drops from 25 to 25 - 5 = 20
+        assert result["adjusted_target_this_week"] == 20.0
 
     def test_multiple_excused_days_same_week(self):
         start = date(2026, 6, 1)
         today = date(2026, 6, 8)  # Week 2, day 1
         excused = {date(2026, 6, 3), date(2026, 6, 4)}  # two excused days in week 1
         result = compute_balance([], start, today, excused)
-        # Week 1 target drops from 25 to 25*5/7 = 17.86
-        assert result["cumulative_balance"] == -17.86
-        assert result["adjusted_target_this_week"] == 42.86
+        # Week 1 target drops from 25 to 25 - 2*5 = 15
+        assert result["cumulative_balance"] == -15.0
+        assert result["adjusted_target_this_week"] == 40.0
+
+    def test_five_excused_days_zeroes_week_target(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2, day 1
+        excused = {date(2026, 6, d) for d in range(1, 6)}  # 5 of 7 days in week 1
+        result = compute_balance([], start, today, excused)
+        # 5 excused days * 5h = 25, so week 1 target floors at 0
+        assert result["cumulative_balance"] == 0.0
+        assert result["adjusted_target_this_week"] == 25.0
 
     def test_all_seven_days_excused_zeroes_week_target(self):
         start = date(2026, 6, 1)
         today = date(2026, 6, 8)  # Week 2, day 1
         excused = {date(2026, 6, d) for d in range(1, 8)}  # all of week 1
         result = compute_balance([], start, today, excused)
-        # Week 1 target is 0, so no debt accrues and week 2 stays at the normal 25
+        # Week 1 target floors at 0, so no debt accrues and week 2 stays at the normal 25
         assert result["cumulative_balance"] == 0.0
         assert result["adjusted_target_this_week"] == 25.0
 
@@ -141,6 +150,22 @@ class TestExcusedDays:
         result = compute_balance(entries, start, today, excused)
         assert result["cumulative_balance"] == 0.0
         assert result["adjusted_target_this_week"] == 25.0
+
+
+class TestExcusedDaysThisWeek:
+    def test_empty_when_no_excused_days(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 1)
+        result = compute_balance([], start, today)
+        assert result["excused_days_this_week"] == []
+
+    def test_includes_only_current_week_dates_sorted(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2 (June 8-14)
+        excused = {date(2026, 6, 3), date(2026, 6, 10), date(2026, 6, 9)}
+        result = compute_balance([], start, today, excused)
+        # June 3 is in week 1 (completed), so excluded; week 2 dates included, sorted
+        assert result["excused_days_this_week"] == ["2026-06-09", "2026-06-10"]
 
 
 class TestParseExcusedDays:
