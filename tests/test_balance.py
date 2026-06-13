@@ -1,6 +1,6 @@
 import pytest
 from datetime import date
-from balance import compute_balance, get_week_number, parse_entries_for_balance
+from balance import compute_balance, get_week_number, parse_entries_for_balance, parse_excused_days
 
 
 def entry(d: date, minutes: int):
@@ -93,6 +93,66 @@ class TestBalance:
         assert result["cumulative_balance"] == 0.0   # No completed weeks to evaluate
         assert result["this_week_hours"] == 3.0
         assert result["adjusted_target_this_week"] == 25.0
+
+
+class TestExcusedDays:
+    def test_excused_day_in_completed_week_reduces_target(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2, day 1
+        excused = {date(2026, 6, 3)}  # one excused day in week 1
+        result = compute_balance([], start, today, excused)
+        # Week 1 target drops from 25 to 25*6/7 = 21.43
+        assert result["cumulative_balance"] == -21.43
+        assert result["adjusted_target_this_week"] == 46.43
+
+    def test_excused_day_in_current_week_reduces_target(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 3)  # Still in week 1, no completed weeks
+        excused = {date(2026, 6, 5)}  # excused day later this week
+        result = compute_balance([], start, today, excused)
+        assert result["completed_weeks"] == 0
+        assert result["cumulative_balance"] == 0.0
+        # Week 1 target drops from 25 to 25*6/7 = 21.43
+        assert result["adjusted_target_this_week"] == 21.43
+
+    def test_multiple_excused_days_same_week(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2, day 1
+        excused = {date(2026, 6, 3), date(2026, 6, 4)}  # two excused days in week 1
+        result = compute_balance([], start, today, excused)
+        # Week 1 target drops from 25 to 25*5/7 = 17.86
+        assert result["cumulative_balance"] == -17.86
+        assert result["adjusted_target_this_week"] == 42.86
+
+    def test_all_seven_days_excused_zeroes_week_target(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2, day 1
+        excused = {date(2026, 6, d) for d in range(1, 8)}  # all of week 1
+        result = compute_balance([], start, today, excused)
+        # Week 1 target is 0, so no debt accrues and week 2 stays at the normal 25
+        assert result["cumulative_balance"] == 0.0
+        assert result["adjusted_target_this_week"] == 25.0
+
+    def test_excused_date_outside_tracking_range_has_no_effect(self):
+        start = date(2026, 6, 1)
+        today = date(2026, 6, 8)  # Week 2, day 1
+        entries = [entry(date(2026, 6, d), 300) for d in range(1, 6)]  # exactly 25h
+        excused = {date(2026, 5, 25)}  # before tracking start
+        result = compute_balance(entries, start, today, excused)
+        assert result["cumulative_balance"] == 0.0
+        assert result["adjusted_target_this_week"] == 25.0
+
+
+class TestParseExcusedDays:
+    def test_string_dates_converted(self):
+        raw = [{"excused_date": "2026-06-03"}, {"excused_date": "2026-06-04"}]
+        parsed = parse_excused_days(raw)
+        assert parsed == {date(2026, 6, 3), date(2026, 6, 4)}
+
+    def test_duplicate_dates_deduplicated(self):
+        raw = [{"excused_date": "2026-06-03"}, {"excused_date": "2026-06-03"}]
+        parsed = parse_excused_days(raw)
+        assert parsed == {date(2026, 6, 3)}
 
 
 class TestParseEntries:

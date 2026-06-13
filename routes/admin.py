@@ -88,3 +88,27 @@ def hide_packer(packer_id):
 def delete_packer(packer_id):
     models.delete_packer(packer_id)
     return redirect(url_for("admin.index"))
+
+
+@bp.route("/excused-days")
+def excused_days():
+    days = models.list_all_excused_days()
+    packers = models.list_all_packers()
+    return render_template("admin_excused_days.html", days=days, packers=packers)
+
+
+@bp.route("/excused-days/new", methods=["POST"])
+def new_excused_day():
+    packer_id = request.form.get("packer_id") or None
+    models.create_excused_day(
+        packer_id=int(packer_id) if packer_id else None,
+        excused_date=date.fromisoformat(request.form["excused_date"]),
+        reason=request.form.get("reason") or None,
+    )
+    return redirect(url_for("admin.excused_days"))
+
+
+@bp.route("/excused-days/<int:excused_day_id>/delete", methods=["POST"])
+def delete_excused_day(excused_day_id):
+    models.delete_excused_day(excused_day_id)
+    return redirect(url_for("admin.excused_days"))

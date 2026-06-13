@@ -66,6 +66,7 @@ def set_packer_hidden(packer_id, hidden: bool):
 def delete_packer(packer_id):
     db = get_db()
     db.execute("DELETE FROM work_entries WHERE packer_id=?", (packer_id,))
+    db.execute("DELETE FROM excused_days WHERE packer_id=?", (packer_id,))
     db.execute("DELETE FROM packers WHERE id=?", (packer_id,))
     db.commit()
     # audit_log rows are intentionally retained after packer deletion
@@ -138,3 +139,40 @@ def get_recent_audit(limit=50):
     return get_db().execute(
         "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?", (limit,)
     ).fetchall()
+
+
+# ── Excused Days ─────────────────────────────────────────────────────────────
+
+def create_excused_day(packer_id, excused_date, reason):
+    db = get_db()
+    cur = db.execute(
+        "INSERT INTO excused_days (packer_id, excused_date, reason) VALUES (?, ?, ?)",
+        (packer_id, str(excused_date), reason),
+    )
+    db.commit()
+    return cur.lastrowid
+
+
+def get_excused_days_for_packer(packer_id):
+    """Excused days that apply to this packer: global (packer_id IS NULL) or theirs."""
+    return get_db().execute(
+        """SELECT * FROM excused_days
+           WHERE packer_id = ? OR packer_id IS NULL
+           ORDER BY excused_date""",
+        (packer_id,),
+    ).fetchall()
+
+
+def list_all_excused_days():
+    return get_db().execute(
+        """SELECT excused_days.*, packers.name AS packer_name
+           FROM excused_days
+           LEFT JOIN packers ON packers.id = excused_days.packer_id
+           ORDER BY excused_date"""
+    ).fetchall()
+
+
+def delete_excused_day(excused_day_id):
+    db = get_db()
+    db.execute("DELETE FROM excused_days WHERE id=?", (excused_day_id,))
+    db.commit()

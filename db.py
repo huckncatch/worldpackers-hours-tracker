@@ -28,6 +28,15 @@ CREATE TABLE IF NOT EXISTS work_entries (
     FOREIGN KEY (packer_id) REFERENCES packers(id)
 );
 
+CREATE TABLE IF NOT EXISTS excused_days (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    packer_id    INTEGER,
+    excused_date TEXT    NOT NULL,
+    reason       TEXT,
+    created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (packer_id) REFERENCES packers(id)
+);
+
 CREATE TABLE IF NOT EXISTS audit_log (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     operation    TEXT NOT NULL,

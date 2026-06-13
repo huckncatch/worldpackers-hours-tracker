@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from datetime import date
 import models
-from balance import compute_balance, parse_entries_for_balance
+from balance import compute_balance, parse_entries_for_balance, parse_excused_days
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -21,9 +21,10 @@ def packer_stats(packer_id):
 
     raw_entries = models.get_entries_for_packer(packer_id)
     entries = parse_entries_for_balance(raw_entries)
+    excused_dates = parse_excused_days(models.get_excused_days_for_packer(packer_id))
     tracking_start = date.fromisoformat(packer["tracking_start_date"])
 
-    balance = compute_balance(entries, tracking_start, today)
+    balance = compute_balance(entries, tracking_start, today, excused_dates)
     return jsonify({
         "packer_id": packer_id,
         "packer_name": packer["name"],

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Admin — Excused Days{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Excused Days</h1>
+  <a href="{{ url_for('admin.index') }}" class="text-sm text-gray-600 hover:underline">← Packers</a>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-5 mb-6">
+<form method="post" action="{{ url_for('admin.new_excused_day') }}" class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Date</label>
+    <input type="date" name="excused_date" required class="w-full border rounded-lg px-3 py-2">
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Applies to</label>
+    <select name="packer_id" class="w-full border rounded-lg px-3 py-2">
+      <option value="">All packers</option>
+      {% for p in packers %}
+      <option value="{{ p.id }}">{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Reason (optional)</label>
+    <input type="text" name="reason" class="w-full border rounded-lg px-3 py-2">
+  </div>
+  <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded-lg font-medium">Add</button>
+</form>
+</div>
+
+<div class="bg-white rounded-2xl shadow overflow-hidden">
+<table class="w-full text-sm">
+  <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+    <tr>
+      <th class="px-4 py-3 text-left">Date</th>
+      <th class="px-4 py-3 text-left">Applies To</th>
+      <th class="px-4 py-3 text-left">Reason</th>
+      <th class="px-4 py-3 text-left">Actions</th>
+    </tr>
+  </thead>
+  <tbody class="divide-y">
+  {% for d in days %}
+  <tr>
+    <td class="px-4 py-3">{{ d.excused_date }}</td>
+    <td class="px-4 py-3">{{ d.packer_name if d.packer_name else 'All packers' }}</td>
+    <td class="px-4 py-3 text-gray-500">{{ d.reason or '' }}</td>
+    <td class="px-4 py-3">
+      <form method="post" action="{{ url_for('admin.delete_excused_day', excused_day_id=d.id) }}" class="contents">
+        <button class="text-red-500 text-xs hover:underline cursor-pointer">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+  {% if not days %}
+  <tr><td class="px-4 py-3 text-gray-400" colspan="4">No excused days yet.</td></tr>
+  {% endif %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

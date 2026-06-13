@@ -8,8 +8,6 @@
 
 - [ ] **Swipe-to-delete on entries list** — Remove the inline ✕ delete button from the log entry page. Replace with either (a) swipe-left gesture to reveal a delete action (CSS/JS), or (b) move delete into the edit form so Edit is the only visible action in the list. Option (b) is simpler and keeps the list cleaner.
 
-- [ ] **Excused days (blocked-out dates)** — Allow the host to mark specific dates as exempt from hours calculations (e.g. camping trips, travel days, host days off). Excused days should pro-rate the weekly target: a week with N excused days has a target of `25 × (7 − N) / 7` hours instead of the full 25. Needs: a new `excused_days` table (packer_id or NULL for all packers, date, reason); admin UI to add/remove excused days; balance logic updated to subtract excused days from each week's target. Consider whether excused days apply globally (all packers) or per-packer.
-
 ## Completed
 
 - [x] Project scaffold, DB schema, routes, balance logic, full UI (2026-06-07)
@@ -20,4 +18,5 @@
 - [x] Multi-column time picker (hour/minute/AM-PM selects) (2026-06-09)
 - [x] Self-contained deploy setup — `bin/install.sh` provisions `.env`, venv/deps, LaunchAgent, and starts the server (2026-06-09)
 - [x] Cross-architecture tmux support — `bin/start.sh` detects Homebrew's tmux path on both Apple Silicon and Intel Macs (2026-06-11)
+- [x] Excused days (blocked-out dates) — new `excused_days` table (global or per-packer), admin UI to add/remove, balance logic pro-rates each week's 25h target by `25 × (7 − N) / 7` (2026-06-11)
 - [x] Single 15-minute time picker — replaced hour/minute/AM-PM three-select with one select of "HH:MM" 24h values labeled in 12h format (2026-06-12)
