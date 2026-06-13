@@ -20,3 +20,4 @@
 - [x] Multi-column time picker (hour/minute/AM-PM selects) (2026-06-09)
 - [x] Self-contained deploy setup — `bin/install.sh` provisions `.env`, venv/deps, LaunchAgent, and starts the server (2026-06-09)
 - [x] Cross-architecture tmux support — `bin/start.sh` detects Homebrew's tmux path on both Apple Silicon and Intel Macs (2026-06-11)
+- [x] Single 15-minute time picker — replaced hour/minute/AM-PM three-select with one select of "HH:MM" 24h values labeled in 12h format (2026-06-12)

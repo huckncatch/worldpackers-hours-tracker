@@ -72,12 +72,8 @@ def test_log_entry_submit_creates_entry(client, app):
     pid = _make_packer(app)
     resp = client.post(f"/log/{pid}", data={
         "entry_date": "2026-06-07",
-        "start_hour": "9",
-        "start_minute": "00",
-        "start_ampm": "AM",
-        "end_hour": "12",
-        "end_minute": "00",
-        "end_ampm": "PM",
+        "start_time": "09:00",
+        "end_time": "12:00",
         "task_description": "Weeding",
     }, follow_redirects=True)
     assert resp.status_code == 200

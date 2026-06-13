@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Log Hours — {{ packer.name }}{% endblock %}
 {% macro time_select(name, options, selected) %}
-        <select name="{{ name }}" required class="flex-1 min-w-0 border rounded-lg px-2 py-2 text-sm">
+        <select name="{{ name }}" required class="block w-full border rounded-lg px-3 py-2 text-sm bg-white">
           <option value="">--</option>
-          {% for opt in options %}
-          <option value="{{ opt }}" {% if selected == opt %}selected{% endif %}>{{ opt }}</option>
+          {% for value, label in options %}
+          <option value="{{ value }}" {% if selected == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
 {% endmacro %}
@@ -34,19 +34,11 @@
     </div>
     <div>
       <label class="block text-sm text-gray-600 mb-1">Start</label>
-      <div class="flex gap-2">
-        {{ time_select('start_hour', hour_options, start_parts[0] if start_parts else None) }}
-        {{ time_select('start_minute', minute_options, start_parts[1] if start_parts else None) }}
-        {{ time_select('start_ampm', ampm_options, start_parts[2] if start_parts else None) }}
-      </div>
+      {{ time_select('start_time', time_options, edit_entry.start_time if edit_entry else None) }}
     </div>
     <div>
       <label class="block text-sm text-gray-600 mb-1">End</label>
-      <div class="flex gap-2">
-        {{ time_select('end_hour', hour_options, end_parts[0] if end_parts else None) }}
-        {{ time_select('end_minute', minute_options, end_parts[1] if end_parts else None) }}
-        {{ time_select('end_ampm', ampm_options, end_parts[2] if end_parts else None) }}
-      </div>
+      {{ time_select('end_time', time_options, edit_entry.end_time if edit_entry else None) }}
     </div>
     <div>
       <label class="block text-sm text-gray-600 mb-1">Task (optional)</label>

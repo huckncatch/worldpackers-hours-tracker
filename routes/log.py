@@ -4,42 +4,26 @@ import models
 
 bp = Blueprint("log", __name__, url_prefix="/log")
 
-HOUR_OPTIONS = [str(h) for h in range(1, 13)]
-MINUTE_OPTIONS = ["00", "15", "30", "45"]
-AMPM_OPTIONS = ["AM", "PM"]
+def _time_options():
+    """All 'HH:MM' 24h values in 15-minute increments, paired with a 12h display label."""
+    options = []
+    for total_minutes in range(0, 24 * 60, 15):
+        h, m = divmod(total_minutes, 60)
+        ampm = "AM" if h < 12 else "PM"
+        h12 = h % 12 or 12
+        options.append((f"{h:02d}:{m:02d}", f"{h12}:{m:02d} {ampm}"))
+    return options
 
 
-def _to_24h(hour12: str, minute: str, ampm: str) -> str:
-    """Combine 12h picker components into a 24h 'HH:MM' string."""
-    h = int(hour12) % 12
-    if ampm == "PM":
-        h += 12
-    return f"{h:02d}:{minute}"
-
-
-def _from_24h(time_str: str) -> tuple[str, str, str]:
-    """Split a 24h 'HH:MM' string into (hour12, minute, ampm)."""
-    h, m = time_str.split(":")
-    h = int(h)
-    ampm = "AM" if h < 12 else "PM"
-    h12 = h % 12 or 12
-    return str(h12), m, ampm
+TIME_OPTIONS = _time_options()
 
 
 def _time_from_form(prefix: str) -> str:
-    return _to_24h(
-        request.form[f"{prefix}_hour"],
-        request.form[f"{prefix}_minute"],
-        request.form[f"{prefix}_ampm"],
-    )
+    return request.form[f"{prefix}_time"]
 
 
 def _picker_options():
-    return {
-        "hour_options": HOUR_OPTIONS,
-        "minute_options": MINUTE_OPTIONS,
-        "ampm_options": AMPM_OPTIONS,
-    }
+    return {"time_options": TIME_OPTIONS}
 
 
 def _date_slots(anchor=None, days=30):
@@ -137,8 +121,6 @@ def edit_entry(packer_id, entry_id):
             return render_template("log_entry.html", packer=packer, edit_entry=entry_row,
                                    entries=models.get_entries_for_packer(packer_id),
                                    date_slots=_date_slots(), **_picker_options(),
-                                   start_parts=_from_24h(entry_row["start_time"]),
-                                   end_parts=_from_24h(entry_row["end_time"]),
                                    error="End time must be after start time.")
         models.update_work_entry(
             entry_id=entry_id,
@@ -156,6 +138,4 @@ def edit_entry(packer_id, entry_id):
     return render_template("log_entry.html", packer=packer,
                            edit_entry=entry_row,
                            entries=models.get_entries_for_packer(packer_id),
-                           date_slots=_date_slots(), **_picker_options(),
-                           start_parts=_from_24h(entry_row["start_time"]),
-                           end_parts=_from_24h(entry_row["end_time"]))
+                           date_slots=_date_slots(), **_picker_options())
