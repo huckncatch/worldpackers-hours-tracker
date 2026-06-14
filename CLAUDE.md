@@ -67,6 +67,19 @@ For TODO items, use `/epct` (global checkpoint/test-plan process defined in
   before UX checkpoints/testing.
 - Tests: `pytest`
 
-## Cross-repo documentation
+## Cross-repo documentation (Config)
 
 This app's LaunchAgent/tmux auto-start setup is also documented in `~/config/NOTES.md` under "WorldPackers Hours Tracker" (restore steps, verify/restart commands, log paths). If a change here affects `bin/install.sh`, `bin/start.sh`, the LaunchAgent plist (`launchagents/`), the tmux session name, the port (5050), or log file locations, update that section of `~/config/NOTES.md` too — it's the canonical "how to restore this on a fresh machine" reference and lives outside this repo.
+
+## Cross-repo documentation (Obsidian)
+
+This project's status is tracked at `Home/Development/Projects/WorldPackers Hours Tracker Web App.md` in
+the Obsidian vault (`/Users/soob/Dropbox/Apps/Obsidian`), via the
+`obsidian-cortex` MCP server. Update that note when the architecture, feature
+set, or project status change.
+
+Design decisions, research, and plans worth cross-project visibility go in
+`Home/90_Organize/Claude/{decisions,research,plans}/` — see that directory's
+README.md for naming conventions and fileClasses. A design-decision log for
+this project already exists at
+`Home/90_Organize/Claude/decisions/2026-06-07-worldpackers-hours-tracker-design.md`.
