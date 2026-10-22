@@ -73,13 +73,13 @@ This app's LaunchAgent/tmux auto-start setup is also documented in `~/config/NOT
 
 ## Cross-repo documentation (Obsidian)
 
-This project's status is tracked at `Home/Development/Projects/WorldPackers Hours Tracker Web App.md` in
-the Obsidian vault (`/Users/soob/Dropbox/Apps/Obsidian`), via the
-`obsidian-cortex` MCP server. Update that note when the architecture, feature
-set, or project status change.
+This project's note in the Home Obsidian vault is
+`Development/Projects/WorldPackers Hours Tracker Web App.md`
+(vault location and rules: `~/config/brain/`). Update it when
+the architecture, feature set, or project status change.
 
-Design decisions, research, and plans worth cross-project visibility go in
-`Home/90_Organize/Claude/{decisions,research,plans}/` — see that directory's
-README.md for naming conventions and fileClasses. A design-decision log for
-this project already exists at
-`Home/90_Organize/Claude/decisions/2026-06-07-worldpackers-hours-tracker-design.md`.
+Decisions, research, and plans worth cross-project visibility go to the vault
+through the `vault` skill (log flow).
+
+This project's design-decision log is
+`Development/AIConfig/ClaudeCode/decisions/2026-06-07-worldpackers-hours-tracker-design.md`.
